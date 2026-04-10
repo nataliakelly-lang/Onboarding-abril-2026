@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz Onboarding · Koltin</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green: #1A4A38; --lime: #E8F22A; --cream: #F5F3EE; --white: #FFFFFF;
+    --red-bg: #FEF0EE; --red-border: #E8A49A; --red-text: #7A2219;
+    --green-bg: #EAF3DE; --green-border: #8BBF5A; --green-text: #2B5A18;
+    --gray: #6B6B63; --border: #E0DDD6;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); min-height: 100vh; display: flex; align-items: flex-start; justify-content: center; padding: 2rem 1rem 4rem; }
+  .wrap { width: 100%; max-width: 620px; }
+  .header { display: flex; align-items: center; gap: 12px; margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+  .logo { background: var(--green); color: var(--lime); font-family: 'DM Serif Display', serif; font-size: 20px; letter-spacing: -0.5px; padding: 6px 14px; border-radius: 6px; }
+  .header-title { font-size: 13px; color: var(--gray); letter-spacing: 0.06em; text-transform: uppercase; }
+  .prog-row { display: flex; align-items: center; gap: 12px; margin-bottom: 2rem; }
+  .prog-track { flex: 1; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .prog-fill { height: 100%; background: var(--green); border-radius: 2px; transition: width 0.4s ease; }
+  .prog-label { font-size: 12px; color: var(--gray); white-space: nowrap; }
+  .card { background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; animation: fadeIn 0.25s ease; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+  .cat-badge { display: inline-block; font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; background: var(--lime); color: var(--green); padding: 3px 10px; border-radius: 20px; margin-bottom: 1rem; }
+  .q-text { font-family: 'DM Serif Display', serif; font-size: 20px; line-height: 1.4; color: var(--green); margin-bottom: 1.5rem; }
+  .opts { display: flex; flex-direction: column; gap: 10px; }
+  .opt { text-align: left; padding: 13px 16px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--white); color: #2C2C2A; font-family: 'DM Sans', sans-serif; font-size: 14px; line-height: 1.45; cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+  .opt:hover:not(:disabled) { border-color: var(--green); background: #F0F5F2; }
+  .opt.ok   { background: var(--green-bg); border-color: var(--green-border); color: var(--green-text); }
+  .opt.ko   { background: var(--red-bg);   border-color: var(--red-border);   color: var(--red-text); }
+  .opt.show { background: var(--green-bg); border-color: var(--green-border); color: var(--green-text); opacity: .55; }
+  .fb { margin-top: 1.25rem; padding: 13px 16px; border-radius: 10px; font-size: 13px; line-height: 1.6; }
+  .fb.ok { background: var(--green-bg); color: var(--green-text); border: 1px solid var(--green-border); }
+  .fb.ko { background: var(--red-bg);   color: var(--red-text);   border: 1px solid var(--red-border); }
+  .fb strong { font-weight: 600; }
+  .nxt, .restart, .start-btn { padding: 12px 28px; border: none; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; background: var(--green); color: var(--lime); margin-top: 1.5rem; letter-spacing: 0.02em; display: inline-block; }
+  .nxt:hover, .restart:hover, .start-btn:hover { opacity: .88; }
+  .start-card { background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 2.5rem 2rem; text-align: center; animation: fadeIn 0.25s ease; }
+  .start-title { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--green); margin-bottom: .5rem; }
+  .start-sub { font-size: 14px; color: var(--gray); margin-bottom: 2rem; line-height: 1.6; }
+  .field-label { display: block; font-size: 12px; font-weight: 600; color: var(--gray); text-align: left; margin-bottom: 6px; letter-spacing: 0.05em; text-transform: uppercase; }
+  .field-input { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: #2C2C2A; background: var(--cream); outline: none; transition: border-color 0.15s; margin-bottom: 1rem; }
+  .field-input:focus { border-color: var(--green); background: var(--white); }
+  .field-error { font-size: 12px; color: var(--red-text); margin-top: -10px; margin-bottom: 1rem; text-align: left; display: none; }
+  .score-card { background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 2.5rem 2rem; text-align: center; animation: fadeIn 0.3s ease; }
+  .score-ring { width: 100px; height: 100px; border-radius: 50%; background: var(--green); display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 1.5rem; }
+  .score-num   { font-family: 'DM Serif Display', serif; font-size: 28px; color: var(--lime); line-height: 1; }
+  .score-denom { font-size: 11px; color: rgba(232,242,42,.7); letter-spacing: .05em; }
+  .score-pct   { font-family: 'DM Serif Display', serif; font-size: 15px; color: var(--green); margin-bottom: .25rem; }
+  .score-name  { font-size: 13px; color: var(--gray); margin-bottom: 1.5rem; }
+  .score-msg   { font-size: 14px; color: var(--gray); max-width: 380px; margin: 0 auto 2rem; line-height: 1.6; }
+  .cat-grid    { display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; margin-bottom: 1.75rem; }
+  .cat-pill    { font-size: 12px; padding: 5px 12px; border-radius: 20px; background: var(--cream); color: var(--gray); border: 1px solid var(--border); }
+  .cat-pill b  { color: var(--green); font-weight: 600; }
+  .score-actions { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .sync-status { font-size: 12px; color: var(--gray); margin-top: 8px; min-height: 18px; }
+  .sync-status.ok  { color: var(--green-text); }
+  .sync-status.err { color: var(--red-text); }
+  @media (max-width: 480px) { .card, .score-card, .start-card { padding: 1.5rem; } .q-text { font-size: 18px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="logo">Koltin</div>
+    <div class="header-title">Quiz de Onboarding</div>
+  </div>
+  <div id="app"></div>
+</div>
+
+<script>
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby3G1jGodST_iji1gNNoVj7xZi8aFZO2Lll9sWC7YWCyZwrRhFXDiTdnlbFazFx_boH0w/exec';
+
+const ALL=[
+  {cat:"Quiénes somos",q:"¿En qué año fue fundado Koltin?",opts:["2018","2020","2021","2023"],ans:2,exp:"Koltin fue fundado en 2021 por Eduardo Ortiz Reynaga y Carmen Rosillo."},
+  {cat:"Quiénes somos",q:"¿De qué idioma viene 'Koltin' y qué significa?",opts:["Del español: 'cuidado'","Del náhuatl: 'mi abuelo' o 'mi abuela'","Del inglés: 'quality'","Del maya: 'familia'"],ans:1,exp:"Viene del náhuatl 'coltzin', que significa 'mi abuelo' o 'mi abuela'."},
+  {cat:"Quiénes somos",q:"¿Cómo llamamos a nuestros clientes en Koltin?",opts:["Usuarios premium","Afiliados mayores","Grandes Personas","Socios de salud"],ans:2,exp:"En Koltin los llamamos 'Grandes Personas': seres con sabiduría y experiencia que merecen cuidados con dignidad."},
+  {cat:"Quiénes somos",q:"¿Cuál es la edad límite máxima para ingresar a la Membresía por primera vez?",opts:["75 años","80 años","84 años, 11 meses y 0 días","90 años"],ans:2,exp:"El límite es 84 años, 11 meses y 0 días (30 días antes de cumplir 85), con renovaciones vitalicias."},
+  {cat:"Quiénes somos",q:"¿Bajo qué razón social opera Koltin?",opts:["Koltin México S.A. de C.V.","Aplicaciones Gerontológicas SAPI de C.V.","Salud Preventiva BBVA S.A.","Koltin Health Corp."],ans:1,exp:"Opera bajo la razón social Aplicaciones Gerontológicas SAPI de C.V."},
+  {cat:"Quiénes somos",q:"¿Por qué el SGMM de Koltin está en póliza grupal y no individual?",opts:["Porque BBVA lo exige por ley","Para distribuir el riesgo y ofrecer precios más accesibles","Porque los clientes individuales no califican","Para cumplir un requisito fiscal"],ans:1,exp:"En póliza grupal el riesgo se distribuye, lo que permite ofrecer precios más asequibles para adultos mayores."},
+  {cat:"Membresía",q:"¿Cuál es la vigencia de la Membresía de Salud Koltin?",opts:["Mensual","Semestral","Anual","Bienal"],ans:2,exp:"La vigencia es anual. La cobertura estará activa siempre que los pagos estén al corriente."},
+  {cat:"Membresía",q:"¿Qué factores determinan el precio de renovación cada año?",opts:["Tipo de cambio y dólar","Inflación hospitalaria y nuevo rango de edad del asegurado","Precio del petróleo y aranceles médicos","Salario mínimo y paridad cambiaria"],ans:1,exp:"El precio considera la inflación hospitalaria anual en México y el nuevo rango de edad del asegurado."},
+  {cat:"Membresía",q:"¿Qué beneficio NO está incluido para clientes de 0 a 49 años?",opts:["SGMM","Cobertura de accidentes","Estudio de Longevidad y videoconsultas preventivas","2 ambulancias al año"],ans:2,exp:"Para menores de 50 años NO se incluye Estudio de Longevidad, seguimiento preventivo ni actividades en Comunidad."},
+  {cat:"Membresía",q:"¿Hasta qué rango de edad se puede contratar SA de $20,000,000 MXN?",opts:["Hasta 49 años","Hasta 64 años, 11 meses","Hasta 74 años","Sin límite"],ans:1,exp:"El rango 50-64 años es el último donde se puede contratar SA de 20 millones. Después la renovación es vitalicia conservando el mismo monto."},
+  {cat:"Estudio de Longevidad",q:"¿A partir de qué edad está dirigido el Estudio de Longevidad?",opts:["Cualquier edad","40 años","50 años","65 años"],ans:2,exp:"El Estudio de Longevidad está dirigido a todas las Grandes Personas mayores de 50 años."},
+  {cat:"Estudio de Longevidad",q:"¿En qué estados NO hay laboratorios Chopo para el Estudio de Longevidad?",opts:["Oaxaca y Chiapas","Guerrero y Baja California Sur","Colima y Campeche","Tabasco y Nayarit"],ans:1,exp:"En Guerrero y BCS no hay Chopo. En Colima y Campeche no hay DXA, solo les llegan los demás estudios."},
+  {cat:"Estudio de Longevidad",q:"¿En cuánto tiempo envía Chopo los resultados al Equipo de Salud de Koltin?",opts:["12 horas","24 horas","48 a 72 horas","Una semana"],ans:2,exp:"Chopo envía los resultados directamente al Equipo de Salud Koltin en un periodo de 48 a 72 horas."},
+  {cat:"Estudio de Longevidad",q:"¿Dónde terminan sus pruebas presenciales las GP de CDMX y Estado de México?",opts:["Laboratorios Chopo más cercano","Santa Fe","Clínica Roma","Hospital BBVA"],ans:2,exp:"Las GP de CDMX y Edo. Méx. terminan sus pruebas (InBody, Dinamometría y Cognitivas) en la Clínica Roma."},
+  {cat:"Videoconsultas",q:"¿Las videoconsultas de Koltin son para atender emergencias médicas agudas?",opts:["Sí, para cualquier padecimiento","No, son exclusivamente para seguimiento preventivo y programado","Sí, pero solo fines de semana","Solo si el médico lo autoriza"],ans:1,exp:"Las videoconsultas son 100% programadas y preventivas. Para enfermedades agudas se recomienda acudir a valoración presencial."},
+  {cat:"Videoconsultas",q:"¿Cómo agenda una videoconsulta una Gran Persona?",opts:["Directamente con su guía","Por correo a ayuda@koltin.mx","WhatsApp al 56 2452 9159 o llamando al 55 8993 9299 opción 3","A través de la app de BBVA"],ans:2,exp:"La GP escribe por WhatsApp al 56 2452 9159 o llama al 55 8993 9299 opción 3."},
+  {cat:"Videoconsultas",q:"¿Cuál de estas especialidades NO forma parte del Equipo Médico interno de Koltin?",opts:["Cardiología","Ortopedia","Urología","Psicología"],ans:3,exp:"El Equipo Médico interno de Koltin: Gerontología, Geriatría, Nutrición, Medicina General y Ortopedia. Psicología no forma parte del equipo interno."},
+  {cat:"SGMM",q:"¿Cuándo se activa el Seguro de Gastos Médicos Mayores?",opts:["Desde el primer peso de gasto médico","Solo en urgencias","Cuando existe un diagnóstico y el gasto supera el deducible","Automáticamente al contratar la membresía"],ans:2,exp:"El SGMM se activa cuando existe un diagnóstico y se confirma que el tratamiento superará el deducible."},
+  {cat:"SGMM",q:"En caso de accidente, ¿el asegurado paga deducible o coaseguro?",opts:["Sí, ambos","Solo el deducible","Solo el coaseguro","No paga ni deducible ni coaseguro"],ans:3,exp:"En la cobertura de accidentes no existe deducible ni coaseguro: se cubren todos los gastos desde el primer peso."},
+  {cat:"SGMM",q:"¿Cuánto cubre el SGMM para urgencias en el extranjero?",opts:["$100,000 MXN","$500,000 MXN","Hasta $50,000 USD con deducible de $50 USD","Sin límite si es urgencia"],ans:2,exp:"Cobertura de hasta 50,000 USD con deducible de 50 USD, solo para emergencias en viajes ajenos a atención médica, máximo 90 días."},
+  {cat:"SGMM",q:"¿Qué puede ocurrir si se opera sin cumplir la segunda opinión médica requerida?",opts:["El seguro la cubre igual si hay diagnóstico","El dictamen puede ser rechazado","Se paga solo el deducible","BBVA lo aprueba automáticamente"],ans:1,exp:"Si el procedimiento se realiza sin la segunda opinión requerida y no es urgencia, el dictamen puede ser rechazado."},
+  {cat:"Ambulancia",q:"¿Cuántos traslados en ambulancia tiene derecho una GP al año?",opts:["1","2","3","Ilimitados"],ans:1,exp:"Cada persona tiene derecho a hasta 2 traslados de emergencia al año como parte de su membresía."},
+  {cat:"Ambulancia",q:"¿Cómo se solicita la ambulancia de Koltin?",opts:["Llamando al 911","Escribiendo a ayuda@koltin.mx","Llamando al número de Koltin, opción 1, las 24 horas","A través del portal del cliente"],ans:2,exp:"Se llama al número de Koltin, opción 1, las 24 horas del día."},
+  {cat:"Ambulancia",q:"¿Cuánto tiempo de tolerancia hay al llegar al hospital antes de que cobren extra?",opts:["10 minutos","30 minutos","1 hora","No hay tolerancia"],ans:1,exp:"Hay 30 minutos de tolerancia para ingresar al hospital. Después cobran $600 por fracción de media hora."},
+  {cat:"Voz y tono",q:"¿Cuáles son los dos arquetipos de marca que definen la voz Koltin?",opts:["Héroe + Sabio","Cuidador + Persona Común","Explorador + Creador","Gobernante + Bufón"],ans:1,exp:"La voz Koltin se basa en el Cuidador (protege y acompaña con calidez) y la Persona Común (genera cercanía y sentido de pertenencia)."},
+  {cat:"Voz y tono",q:"¿Cómo nos dirigimos por defecto a las Grandes Personas?",opts:["De tú, siempre","De usted, salvo que indiquen preferencia por tú","Por su nombre de pila","De usted únicamente en documentos escritos"],ans:1,exp:"Siempre nos dirigimos a las Grandes Personas como 'Usted', salvo que nos indiquen explícitamente que prefieren el trato en 'tú'."},
+  {cat:"Voz y tono",q:"Al hablar del seguro, ¿cuál es la forma correcta de referirse al deducible?",opts:["'Nuestro deducible'","'El deducible del seguro'","'El deducible de Koltin'","'Nuestro copago'"],ans:1,exp:"Evitamos hablar en primera persona porque Koltin no es la aseguradora. Se dice 'el deducible del seguro', no 'nuestro deducible'."},
+  {cat:"Voz y tono",q:"¿Cuál es la forma correcta de hacer una comparación con la competencia?",opts:["'Nuestro seguro es más barato que otros'","'Nuestra membresía es más accesible que otras opciones del mercado'","'Nuestro seguro protege mejor a personas mayores'","'BBVA nos hace mejores que cualquier aseguradora'"],ans:1,exp:"Siempre comparamos la membresía Koltin (no el seguro), porque es lo que realmente comercializamos."},
+  {cat:"Proceso de ventas",q:"¿Cuál es el objetivo de la llamada de introducción?",opts:["Cerrar la venta en la primera llamada","Generar conexión, entender el perfil, validar interés y sentar bases para el siguiente paso","Explicar todos los tiempos de espera del seguro","Solicitar documentos médicos del prospecto"],ans:1,exp:"La llamada de introducción busca generar conexión, entender el perfil del cliente, validar interés y sentar las bases para una posible venta o seguimiento."},
+  {cat:"Proceso de ventas",q:"¿Qué debes hacer si el prospecto dice que no es buen momento para hablar?",opts:["Continuar con la presentación de Koltin","Colgar y volver a llamar al día siguiente","Preguntar cuándo es buen momento y acordarlo en ese momento","Enviar información por WhatsApp sin más contacto"],ans:2,exp:"Se debe preguntar directamente cuándo es buen momento y acordarlo en ese instante. Muestra respeto por el tiempo del prospecto."},
+  {cat:"Proceso de ventas",q:"¿Qué NO debes prometer durante el proceso de ventas?",opts:["Que el equipo de salud acompañará al cliente","Que el seguro cubre preexistencias","Que la membresía incluye seguimiento preventivo","Que hay opciones de pago anual y fraccionado"],ans:1,exp:"Nunca debes prometer cobertura de preexistencias. Si es el caso, se debe dejar muy claro que no se cubren."},
+  {cat:"Proceso de ventas",q:"¿Qué frase define el cierre puercoespín?",opts:["Resumir todos los beneficios y preguntar si desea iniciar","Aprovechar la pregunta del cliente para devolverla como afirmación que lo acerca al cierre","Hacer ver las consecuencias de no contratar","Usar preguntas cortas que invitan al cliente a afirmar lo que ya valora"],ans:1,exp:"El cierre puercoespín aprovecha las preguntas del cliente para devolverlas como afirmaciones que lo acercan al cierre, sin forzar."},
+  {cat:"Tipos de cierre",q:"¿En qué consiste el cierre por amarre?",opts:["Resumir los beneficios y confirmar si cumple lo que el cliente busca","Usar frases como '¿Verdad?', '¿Cierto?' para obtener pequeños acuerdos que allanen el camino al cierre","Hacer ver las consecuencias de no contratar","Aprovechar las preguntas del cliente como trampolín al cierre"],ans:1,exp:"El cierre por amarre utiliza pequeñas frases interrogativas ('¿Verdad?', '¿Cierto?', '¿No lo cree?') para que el cliente afirme lo que ya está valorando positivamente."},
+  {cat:"Tipos de cierre",q:"¿En qué consiste el cierre resumen?",opts:["Preguntar '¿Le gustaría avanzar?' después de cada beneficio","Recapitular los beneficios más relevantes y confirmar que la propuesta cumple con lo que el cliente busca","Mostrar las consecuencias de no tomar acción","Usar la pregunta del cliente para avanzar al cierre"],ans:1,exp:"El cierre resumen recapitula los beneficios mencionados y confirma si la propuesta cumple lo que el cliente busca. Si responde sí, se avanza al cierre."},
+  {cat:"Tipos de cierre",q:"¿En qué consiste el cierre por coste de oportunidad?",opts:["Hacer al cliente un resumen de los beneficios acordados","Devolverle su propia pregunta convertida en afirmación","Lograr que el cliente visualice las consecuencias de no tomar acción","Usar pequeños acuerdos para llegar al cierre final"],ans:2,exp:"El cierre por coste de oportunidad busca que el cliente visualice las consecuencias de no contratar: quedarse sin protección puede ser más costoso que actuar ahora."},
+  {cat:"Formas de pago",q:"¿Qué métodos de pago aplican para pago ANUAL?",opts:["Solo domiciliación con tarjeta de crédito","Tarjeta de crédito o débito por link de pago en Sales, transferencia STP o terminal punto de venta","Solo transferencia bancaria","Solo efectivo en oficinas Koltin"],ans:1,exp:"Para pago anual aplica: tarjeta de crédito o débito por link de pago en Sales, transferencia STP o terminal punto de venta."},
+  {cat:"Formas de pago",q:"¿Qué métodos aplican para pago mensual, trimestral o semestral?",opts:["Tarjeta de crédito, débito o transferencia","Solo efectivo","Únicamente domiciliación con link de pago","Cualquier método, a elección del cliente"],ans:2,exp:"Para pagos fraccionados (mensual, trimestral o semestral) aplica únicamente domiciliación con link de pago."},
+  {cat:"Formas de pago",q:"¿Cuánto es el recargo por pago semestral?",opts:["2%","4%","6%","7%"],ans:1,exp:"Al pagar de forma semestral se aplica un recargo del 4%, trimestral 6% y mensual 7%."},
+  {cat:"Formas de pago",q:"¿Se puede realizar un pago con dos métodos distintos (ej. 50% tarjeta + 50% transferencia)?",opts:["Sí, siempre que sume el total","Solo en pagos anuales","No, no se acepta más de una forma de pago por transacción","Sí, con autorización de Billing"],ans:2,exp:"No se acepta más de una forma de pago por transacción. Los pagos deben realizarse con un solo método y por el importe total."},
+  {cat:"Facturación",q:"¿Cuándo se puede solicitar la factura en Koltin?",opts:["Antes de realizar el pago para concretar la venta","Solo al renovar","Únicamente después de realizar el pago","En cualquier momento del mes"],ans:2,exp:"La factura solo puede solicitarse después de realizar el pago, ya sea por venta nueva o renovación. No se emiten facturas anticipadas."},
+  {cat:"Facturación",q:"¿Bajo qué concepto fiscal se emite la factura de Koltin?",opts:["Prima de seguro","D07 (póliza de seguros)","Honorarios médicos o gastos en general","Servicios financieros"],ans:2,exp:"Koltin no es aseguradora, por lo que no emite facturas por concepto de primas ni como D07. Se emite por honorarios médicos o gastos en general."},
+  {cat:"Facturación",q:"¿Cuándo se emite la factura al cliente?",opts:["A los 5 días hábiles","Al mes siguiente","De manera inmediata al realizarse el pago","Solo si el cliente la solicita expresamente"],ans:2,exp:"La factura se emite de manera inmediata al realizarse el pago, siempre dentro del mismo mes calendario."},
+  {cat:"Facturación",q:"¿Cuántas facturas se emiten por familia o paquete grupal?",opts:["Una sola factura global","Una factura por cada membresía contratada","Dos: una por el seguro y otra por los servicios preventivos","La que el cliente solicite"],ans:1,exp:"Se emite una factura por cada membresía contratada. No aplican facturas globales para paquetes familiares o empresariales."},
+  {cat:"Antigüedad",q:"¿Qué documentos se requieren para validar antigüedad en una póliza INDIVIDUAL?",opts:["Solo carta de antigüedad","Carátula de póliza vigente + comprobante de pago (o carta de antigüedad + carátula + comprobante)","Solo el comprobante de pago","INE del asegurado + carátula"],ans:1,exp:"Para pólizas individuales: Opción 1: carátula vigente + comprobante de pago. Opción 2: carta de antigüedad + carátula + comprobante de pago."},
+  {cat:"Antigüedad",q:"¿Se acepta antigüedad de pólizas extranjeras no reguladas en México, como Best Doctors?",opts:["Sí, si están vigentes","Solo si tienen más de 2 años","No, no se aceptan pólizas extranjeras no reguladas en México","Solo si son de aseguradoras americanas"],ans:2,exp:"No se aceptan antigüedades de pólizas extranjeras no reguladas en México. Por ejemplo, Best Doctors no es aceptada."},
+  {cat:"Antigüedad",q:"¿Qué tipo de comprobante de pago NO es válido para validar antigüedad?",opts:["Transferencia con referencia al seguro","Estado de cuenta","Factura de ingreso o 'para pagar'","Ticket de pago en ventanilla"],ans:2,exp:"Solo se aceptan: facturas de pago (no de ingreso ni 'para pagar'), transferencias con referencia al seguro, estados de cuenta y tickets de pago en ventanilla."},
+  {cat:"Antigüedad",q:"Si una póliza venció el 15 de noviembre y el cliente contrata el 1 de diciembre, ¿cuándo será su segundo cobro?",opts:["El 1 de enero","El 15 de diciembre","El 1 de diciembre del año siguiente","El 15 de noviembre del año siguiente"],ans:1,exp:"El pago del 1 de diciembre cubre del 15 de noviembre al 15 de diciembre. Por eso el siguiente cobro se genera el 15 de diciembre (segundo pago consecutivo)."},
+  {cat:"Días de gracia",q:"¿Hasta qué día del periodo de gracia sigue siendo válida la póliza para mantener la antigüedad?",opts:["Día 1 del periodo de gracia","Antes del día 27 del periodo de gracia","Hasta el último día del periodo de gracia","No existe periodo de gracia en Koltin"],ans:1,exp:"La póliza debe estar vigente o estar antes del día 27 de su tiempo de gracia para que aplique el reconocimiento de antigüedad."},
+  {cat:"Días de gracia",q:"¿Cuándo debe firmar el cliente su membresía después de haber pagado?",opts:["7 días después","3 días después","15 días después","El mismo día del pago"],ans:3,exp:"El cliente debe firmar el mismo día en que realiza el pago. No se puede pagar en un mes y firmar en otro."},
+  {cat:"Portal para clientes",q:"¿Qué datos necesita una GP para ingresar al portal de clientes?",opts:["CURP y contraseña","Número de póliza y RFC","Número de certificado y fecha de nacimiento","Correo electrónico y PIN"],ans:2,exp:"El cliente necesita su número de certificado y fecha de nacimiento (DD/MM/AAAA) para ingresar al portal."},
+  {cat:"Portal para clientes",q:"Una vez enviado el expediente médico, ¿el cliente puede editarlo?",opts:["Sí, en cualquier momento","Solo en las primeras 24 horas","No, solo los médicos del portal interno de Koltin pueden hacer cambios","Sí, con autorización del guía"],ans:2,exp:"Una vez enviado el expediente, el cliente ya no puede editarlo. Solo los médicos del portal interno de Koltin pueden hacer cambios."},
+  {cat:"Guía Koltin",q:"¿Cuál es el principal objetivo de un Guía Koltin con los clientes?",opts:["Cerrar ventas a cualquier costo","Construir relaciones de confianza y facilitar una experiencia fluida mediante venta consultiva","Cumplir metas de actividad semanales","Gestionar pagos y renovaciones"],ans:1,exp:"El Guía construye relaciones de confianza, brinda orientación clara y aplica venta consultiva de principio a fin."},
+];
+
+function shuffle(a){return[...a].sort(()=>Math.random()-.5)}
+let qs,cur,score,answered,picks,userName,catResults;
+
+function renderStart(){
+  document.getElementById('app').innerHTML=`
+    <div class="start-card">
+      <div class="cat-badge">${ALL.length} preguntas · 13 categorías</div>
+      <div class="start-title">Quiz de Onboarding</div>
+      <div class="start-sub">Pon a prueba tu conocimiento sobre Koltin. Las preguntas aparecen en orden aleatorio y tus resultados se registran automáticamente al terminar.</div>
+      <label class="field-label" for="nombre">Tu nombre completo</label>
+      <input class="field-input" id="nombre" type="text" placeholder="Ej. Ana García" autocomplete="name" onkeydown="if(event.key==='Enter')startQuiz()">
+      <div class="field-error" id="nombre-err">Por favor ingresa tu nombre para continuar.</div>
+      <button class="start-btn" onclick="startQuiz()">Comenzar quiz →</button>
+    </div>`;
+}
+
+function startQuiz(){
+  const val=document.getElementById('nombre').value.trim();
+  if(!val){document.getElementById('nombre-err').style.display='block';document.getElementById('nombre').focus();return;}
+  userName=val;
+  qs=shuffle(ALL); cur=0; score=0; answered=false; picks={}; catResults={};
+  render();
+}
+
+function render(){
+  const app=document.getElementById('app');
+  if(cur>=qs.length){renderScore(app);return;}
+  const q=qs[cur];
+  const pct=Math.round((cur/qs.length)*100);
+  app.innerHTML=`
+    <div class="prog-row">
+      <div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div>
+      <div class="prog-label">${cur+1} / ${qs.length}</div>
+    </div>
+    <div class="card">
+      <div class="cat-badge">${q.cat}</div>
+      <div class="q-text">${q.q}</div>
+      <div class="opts">${q.opts.map((o,i)=>`<button class="opt" onclick="pick(${i})">${o}</button>`).join('')}</div>
+      <div id="fb"></div><div id="nav"></div>
+    </div>`;
+  answered=false;
+}
+
+function pick(i){
+  if(answered)return; answered=true;
+  const q=qs[cur]; picks[cur]=i;
+  const ok=i===q.ans; if(ok)score++;
+  if(!catResults[q.cat])catResults[q.cat]={ok:0,tot:0};
+  catResults[q.cat].tot++; if(ok)catResults[q.cat].ok++;
+  document.querySelectorAll('.opt').forEach((b,idx)=>{
+    b.disabled=true;
+    if(idx===q.ans)b.classList.add(ok?'ok':'show');
+    if(idx===i&&!ok)b.classList.add('ko');
+  });
+  document.getElementById('fb').innerHTML=`<div class="fb ${ok?'ok':'ko'}"><strong>${ok?'✓ Correcto.':'✗ Incorrecto.'}</strong> ${q.exp}</div>`;
+  document.getElementById('nav').innerHTML=`<button class="nxt" onclick="next()">${cur+1<qs.length?'Siguiente pregunta →':'Ver resultados →'}</button>`;
+}
+
+function next(){cur++;render();}
+
+function renderScore(app){
+  const pct=Math.round((score/qs.length)*100);
+  const msg=pct===100?'¡Perfecto! Conoces el onboarding completo. Estás listo para ser un gran Kolter. 🏎️'
+    :pct>=75?'Muy bien. Tienes una base sólida. Repasa las categorías donde fallaste.'
+    :pct>=50?'Vas por buen camino. Revisa en el Notion las secciones donde tuviste errores.'
+    :'Aún hay mucho por reforzar. Vuelve al material del onboarding y repite el quiz.';
+  const pills=Object.entries(catResults).map(([cat,d])=>`<span class="cat-pill">${cat}: <b>${d.ok}/${d.tot}</b></span>`).join('');
+  app.innerHTML=`
+    <div class="score-card">
+      <div class="score-ring">
+        <div class="score-num">${score}</div>
+        <div class="score-denom">de ${qs.length}</div>
+      </div>
+      <div class="score-pct">${pct}% correctas</div>
+      <div class="score-name">${userName}</div>
+      <div class="score-msg">${msg}</div>
+      <div class="cat-grid">${pills}</div>
+      <div class="score-actions">
+        <div class="sync-status" id="sync-status">Guardando resultados…</div>
+        <button class="restart" onclick="renderStart()">Repetir quiz</button>
+      </div>
+    </div>`;
+  sendResults();
+}
+
+function sendResults(){
+  const pct=Math.round((score/qs.length)*100);
+  const status=document.getElementById('sync-status');
+  const params=new URLSearchParams({
+    nombre:userName,
+    fecha:new Date().toLocaleString('es-MX',{timeZone:'America/Mexico_City'}),
+    puntaje:score, total:qs.length, porcentaje:pct,
+    cats:JSON.stringify(catResults)
+  });
+  const img=new Image();
+  img.onerror=()=>{
+    setTimeout(()=>{
+      if(status){status.textContent='✓ Resultados guardados correctamente.';status.className='sync-status ok';}
+    },2000);
+  };
+  img.src=APPS_SCRIPT_URL+'?'+params.toString();
+}
+
+renderStart();
+</script>
+</body>
+</html>
